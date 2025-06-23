@@ -6,7 +6,54 @@ Escriba el codigo que ejecute la accion solicitada en cada pregunta.
 """
 
 
+# pylint: disable=import-outside-toplevel
+# pylint: disable=line-too-long
+# flake8: noqa
+"""
+Escriba el codigo que ejecute la accion solicitada en cada pregunta.
+"""
+
+import os
+import zipfile
+import pandas as pd
+
 def pregunta_01():
+    import os
+
+    # Ruta del archivo zip y carpetas de entrada/salida
+    zip_path = "files/input.zip"
+    extract_dir = "files/input"
+    output_dir = "files/output"
+
+    # Crear carpeta "files/output" si no existe
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Descomprimir si aún no está descomprimido
+    if not os.path.exists(extract_dir):
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall("files")
+
+    def procesar_directorio(base_path):
+        frases = []
+        sentimientos = []
+        for sentimiento in ["positive", "negative", "neutral"]:
+            carpeta = os.path.join(base_path, sentimiento)
+            for archivo in os.listdir(carpeta):
+                archivo_path = os.path.join(carpeta, archivo)
+                with open(archivo_path, "r", encoding="utf-8") as f:
+                    contenido = f.read().strip()
+                    frases.append(contenido)
+                    sentimientos.append(sentimiento)
+        return pd.DataFrame({"phrase": frases, "target": sentimientos})
+
+    # Crear datasets
+    train_df = procesar_directorio(os.path.join(extract_dir, "train"))
+    test_df = procesar_directorio(os.path.join(extract_dir, "test"))
+
+    # Guardar CSVs
+    train_df.to_csv(os.path.join(output_dir, "train_dataset.csv"), index=False)
+    test_df.to_csv(os.path.join(output_dir, "test_dataset.csv"), index=False)
+
     """
     La información requerida para este laboratio esta almacenada en el
     archivo "files/input.zip" ubicado en la carpeta raíz.
@@ -71,3 +118,5 @@ def pregunta_01():
 
 
     """
+pregunta_01()
+
